@@ -1,32 +1,59 @@
 import csv
 
 def add(arq, ID, nome, notas):
-    novo_aluno = (ID, nome, notas[0], notas[1], notas[2], notas[3])
+    novo_aluno = {"id": ID, "nome": nome, "nota1": notas[0], "nota2": notas[1], "nota3": notas[2], "nota4": notas[3]}
+    fieldnames = ["id", "nome", "nota1", "nota2", "nota3", "nota4"]
+    
+    # Valida se o arquivo já possui conteúdo para decidir se precisa escrever o cabeçalho
+    precisa_cabecalho = True
+    try:
+        with open(arq, "r", newline="", encoding="utf-8") as a:
+            leitor = csv.reader(a)
+            if any(leitor):
+                precisa_cabecalho = False
+    except FileNotFoundError:
+        pass
+        
     try:
         with open(arq, "a", newline="", encoding="utf-8") as a:
-            dados = csv.writer(a)
-            
+            dados = csv.DictWriter(a, fieldnames=fieldnames)
+            if precisa_cabecalho:
+                dados.writeheader()
             dados.writerow(novo_aluno)
         return True
     except Exception as erro:
         print(f"ERRO! {erro}")
+        return False
         
 def lerArquivo(arq):
     try:
         with open(arq, "r", newline="", encoding="utf-8") as a:
-            dados = csv.DictReader(a, delimiter=",")
-            
+            dados = csv.DictReader(a)
             return list(dados)
+    except FileNotFoundError:
+        return []
     except Exception as e:
-        print(f"ERRO! {e}")
+        print(f"ERRO ao ler o arquivo: {e}")
+        return []
         
-def  Atualizar(arq, aluno_id, bimestre, nota):
+def Atualizar(arq, aluno_id, bimestre, nota):
     dados = lerArquivo(arq)
+    if not dados:
+        print("Erro: Nenhum dado encontrado ou arquivo inexistente.")
+        return
+        
     bi = "nota" + str(bimestre)
+    encontrado = False
     for linha in dados:
         if linha["id"] == str(aluno_id):
             linha[bi] = str(nota)
-    salvar(arq, dados)
+            encontrado = True
+            
+    if encontrado:
+        salvar(arq, dados)
+        print("Nota atualizada com sucesso!")
+    else:
+        print("ERRO! ID do aluno não encontrado.")
 
 def salvar(arq, novos_dados):
     try:
@@ -34,15 +61,20 @@ def salvar(arq, novos_dados):
             fieldnames = ["id", "nome", "nota1", "nota2", "nota3", "nota4"]
             dados = csv.DictWriter(a, fieldnames=fieldnames)
             dados.writeheader()
-            
             dados.writerows(novos_dados)
     except Exception as e:
-        print(f"ERRO! {e}")
+        print(f"ERRO ao salvar dados: {e}")
         
 def excluir(arq, id_aluno):
     dados = lerArquivo(arq)
+    if not dados:
+        print("Erro: Nenhum dado encontrado ou arquivo inexistente.")
+        return
+        
+    novos_dados = [linha for linha in dados if linha["id"] != str(id_aluno)]
     
-    for linha in dados:
-        if linha["id"] == str(id_aluno):
-            dados.remove(linha)
-    salvar(arq, dados)
+    if len(novos_dados) < len(dados):
+        salvar(arq, novos_dados)
+        print("Registro removido com sucesso!")
+    else:
+        print("ERRO! ID do aluno não encontrado.")

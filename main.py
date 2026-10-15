@@ -1,30 +1,65 @@
 from arquivo import *
-from module import *
+from modulo import *
 
 arq = "alunos.csv"
+
 while True:
     cabecalho(["Adicionar Aluno", "Listar Alunos", "Atualizar Nota", "Remover Aluno", "Sair"])
     opc = leiaInt("Sua Opção: ")
+    
     match opc:
         case 1:
-            nome = validText("Nome Aluno(a): ")
-            notas = validNota() # lista com notas
+            print("-="*23)
+            nome = validText("Nome do Aluno(a): ")
+            notas = validNota()
             ID = criarId(arq)
-            info = add(arq, ID, nome, notas)
-            if info:
-                print(f"Aluno {nome} Adicionado!")
+            if add(arq, ID, nome, notas):
+                print(f"Aluno {nome} adicionado com sucesso!")
+            print("-="*23)
         case 2:
+            print("-="*23)
             dados = lerArquivo(arq)
-            for linha in dados:
-                print(linha)
+            if not dados:
+                print("Nenhum aluno cadastrado.")
+            else:
+                for linha in dados:
+                    print(f"ID: {linha['id']} | Nome: {linha['nome']} | Notas: {linha['nota1']}, {linha['nota2']}, {linha['nota3']}, {linha['nota4']}")
+            print("-="*23)
         case 3:
-            aluno = leiaInt("ID do aluno(a): ")
-            bimestre = leiaInt("Deseja mudar nota de qual Bimestre: ")
-            nota = leiaFloat("Nota do Aluno(a): ")
-            Atualizar(arq, aluno, bimestre, nota)
+            print("-="*23)
+            dados = lerArquivo(arq)
+            if not dados:
+                print("ERRO! Nenhum aluno cadastrado.")
+            else:
+                id_aluno = leiaInt("ID do aluno(a): ")
+                
+                # Cria uma lista apenas com os IDs existentes convertidos para int
+                ids_validos = [int(linha["id"]) for linha in dados]
+                
+                if id_aluno in ids_validos:
+                    bimestre = leiaInt("Deseja mudar a nota de qual Bimestre (1 a 4): ")
+                    if 1 <= bimestre <= 4:
+                        nota = leiaFloat("Nova nota do Aluno(a): ")
+                        Atualizar(arq, id_aluno, bimestre, nota)
+                    else:
+                        print("ERRO! Bimestre inválido! Digite de 1 a 4.")
+                else:
+                    print("ERRO! Aluno não encontrado.")
+            print("-="*23)
         case 4:
-            aluno = leiaInt("ID do Aluno(a): ")
-            excluir(arq, aluno)
+            dados = lerArquivo(arq)
+            if not dados:
+                print("ERRO! Nenhum aluno cadastrado.")
+            else:
+                id_aluno = leiaInt("ID do Aluno(a) para remover: ")
+                ids_validos = [int(linha["id"]) for linha in dados]
+                
+                if id_aluno in ids_validos:
+                    excluir(arq, id_aluno)
+                else:
+                    print("ERRO! Aluno não encontrado.")
         case 5:
             print("Saindo...")
             break
+        case _:
+            print("ERRO! Opção inválida. Escolha entre 1 e 5.")
