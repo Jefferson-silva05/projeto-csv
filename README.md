@@ -54,7 +54,3 @@ cd sistema-alunos
 ```bash
 python main.py
 ```
-
-## Objetivo de aprendizagem
-
-Este projeto foi desenvolvido para praticar Python, com foco em funções, estruturas condicionais, laços de repetição, listas, manipulação de arquivos CSV, modularização e validação de dados.
